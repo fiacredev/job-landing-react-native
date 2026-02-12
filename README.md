@@ -1,6 +1,3 @@
-# About Project 
+# More on project.
 
-this is project about job landing that i developed in react native,
-environment variables not yet added you can add your desired ones, it's yours if u need.
-
-this project is completely developed using React Native...
+This React Native Job Landing app allows users to explore job listings, apply directly from their mobile devices, and track their applications. Built with a focus on responsive design and smooth UX, it connects talent to opportunities efficiently.
