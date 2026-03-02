@@ -38,3 +38,19 @@ export const updateDeliveryStatus = async (
 
   return response.json();
 };
+
+
+export const getNearbyDrivers = async (
+  latitude: number,
+  longitude: number
+) => {
+  const response = await fetch(
+    `${BASE_URL}/drivers/nearby?lat=${latitude}&lng=${longitude}`
+  );
+
+  if (!response.ok) {
+    throw new Error("failed to fetch nearby drivers");
+  }
+
+  return response.json();
+};
