@@ -13,56 +13,56 @@ export default function MapSection({ isOnline, delivery }: Props){
 
     const coords = useLiveLocation(isOnline);
     const mapRef = React.useRef<MapView>(null);
-    const markerRef = React.useRef<React.ElementRef<typeof Marker>>(null);
+    // const markerRef = React.useRef<React.ElementRef<typeof Marker>>(null);
 
     // mapRef ref not supported and gonna be removed soon
     
 
-        React.useEffect(() => {
-        if (!coords) return;
+    //     React.useEffect(() => {
+    //     if (!coords) return;
 
-        markerRef.current?.animateMarkerToCoordinate(
-            {
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-            },
-            800 // duration ms
-        );
-        }, [coords]);
+    //     markerRef.current?.animateMarkerToCoordinate(
+    //         {
+    //         latitude: coords.latitude,
+    //         longitude: coords.longitude,
+    //         },
+    //         800 // duration ms
+    //     );
+    //     }, [coords]);
 
             
-        React.useEffect(() => {
-        if (!mapRef.current || !coords) return;
+    //     React.useEffect(() => {
+    //     if (!mapRef.current || !coords) return;
 
-        const points: any[] = [
-        {
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-        },
+    //     const points: any[] = [
+    //     {
+    //         latitude: coords.latitude,
+    //         longitude: coords.longitude,
+    //     },
 
-        ];
+    //     ];
             
-        if (delivery?.pickup && delivery.status === "accepted") {
-        points.push({
-            latitude: delivery.pickup.lat,
-            longitude: delivery.pickup.lng,
-        });
-        }
+    //     if (delivery?.pickup && delivery.status === "accepted") {
+    //     points.push({
+    //         latitude: delivery.pickup.lat,
+    //         longitude: delivery.pickup.lng,
+    //     });
+    //     }
 
-        if (delivery?.dropoff) {
-        points.push({
-            latitude: delivery.dropoff.lat,
-            longitude: delivery.dropoff.lng,
-        });
-        }
+    //     if (delivery?.dropoff) {
+    //     points.push({
+    //         latitude: delivery.dropoff.lat,
+    //         longitude: delivery.dropoff.lng,
+    //     });
+    //     }
 
-        if (points.length > 1) {
-        mapRef.current.fitToCoordinates(points, {
-            edgePadding: { top: 100, right: 50, bottom: 300, left: 50 },
-            animated: true,
-        });
-    }
-    }, [delivery, coords]);
+    //     if (points.length > 1) {
+    //     mapRef.current.fitToCoordinates(points, {
+    //         edgePadding: { top: 100, right: 50, bottom: 300, left: 50 },
+    //         animated: true,
+    //     });
+    // }
+    // }, [delivery, coords]);
 
     if (!coords) return null;
 
@@ -85,7 +85,7 @@ export default function MapSection({ isOnline, delivery }: Props){
             >
 
             {/* this marker ref not supported and is about to be removed soon */}
-            <Marker ref={markerRef} coordinate={coords} title="Driver" />
+            <Marker coordinate={coords} title="Driver" />
 
             {delivery?.pickup && (
             <Marker
