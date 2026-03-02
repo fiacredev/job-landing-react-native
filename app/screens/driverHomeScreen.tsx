@@ -19,32 +19,41 @@ const [delivery, setDelivery] = useState<any | null>(null);
         
 
     useEffect(() => {
-    const s = io(SERVER_URL, {
-        transports: ["websocket"],
-    });
-    s.on("connect", () => {
-        console.log("socket connected:", s.id);
-    });
-    s.on("disconnect", () => {
-        console.log("socket disconnected");
-    });
-    setSocket(s);
-    return () => {
-        s.disconnect();
-    };
+        const s = io(SERVER_URL, {
+            transports: ["websocket"],
+        });
+        s.on("connect", () => {
+            console.log("socket connected:", s.id);
+        });
+        s.on("disconnect", () => {
+            console.log("socket disconnected");
+        });
+
+        s.on("driver:update", (data: { driverId: string; lat: number; lng: number }) => {
+        if (data.driverId === "69a599781200d6a14b2a9681") {
+            console.log("backend confirmed location saved:", data);
+        }
+        });
+
+        setSocket(s);
+        return () => {
+            s.disconnect();
+        };
     }, []);
     
     // function to make sure that everything is going well or not
 
     useEffect(()=>{
-        if (!coords || !isOnline) return;
+
         console.log("about to emit location...");
-        console.log("Socket existss:", !!socket);
-        console.log("Socket connected:", socket?.connected);
-        if(!socket || !socket.connected) return;
-        console.log("socket not found..")
+        if (!coords || !isOnline) return;
+        if (!coords || !isOnline) return;
+        if (!socket || !socket.connected) return;
+
+        console.log("Emitting location...", { lat: coords.latitude, lng: coords.longitude });
+
         socket.emit("driver:location",{
-            driverId: "6995a1441287438bcc1b863d",
+            driverId: "69a599781200d6a14b2a9681",
             lat: coords.latitude,
             lng:coords.longitude
         });
