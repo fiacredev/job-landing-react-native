@@ -30,7 +30,7 @@ const [delivery, setDelivery] = useState<any | null>(null);
         });
 
         s.on("driver:update", (data: { driverId: string; lat: number; lng: number }) => {
-        if (data.driverId === "69a599781200d6a14b2a9681") {
+        if (data.driverId === "69a6e8500ccedebcb2e6bb22") {
             console.log("backend confirmed location saved:", data);
         }
         });
@@ -53,7 +53,7 @@ const [delivery, setDelivery] = useState<any | null>(null);
         console.log("Emitting location...", { lat: coords.latitude, lng: coords.longitude });
 
         socket.emit("driver:location",{
-            driverId: "69a599781200d6a14b2a9681",
+            driverId: "69a6e8500ccedebcb2e6bb22",
             lat: coords.latitude,
             lng:coords.longitude
         });

@@ -54,3 +54,31 @@ export const getNearbyDrivers = async (
 
   return response.json();
 };
+
+
+export const createDelivery = async (data: {
+  pickup: { lat: number; lng: number };
+  dropoff: { lat: number; lng: number };
+}) => {
+  try {
+    console.log("sending delivery data:", data);
+
+    const response = await fetch(`${BASE_URL}/deliveries`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    console.log("response status:", response.status);
+
+    const responseData = await response.json();
+    if (!response.ok) {
+      console.error("aPI error response:", responseData);
+      throw new Error(responseData.message || "failed to create delivery");
+    }
+    return responseData;
+  } catch (err) {
+    console.error("createDelivery failed:", err);
+    throw err;
+  }
+};
