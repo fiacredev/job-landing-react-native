@@ -1,4 +1,5 @@
 const BASE_URL = "https://curb-side-backend.onrender.com";
+import { Alert } from "react-native";
 
 export interface Delivery {
   id: string;
@@ -57,11 +58,19 @@ export const getNearbyDrivers = async (
 
 
 export const createDelivery = async (data: {
+  customer:string;
   pickup: { lat: number; lng: number };
   dropoff: { lat: number; lng: number };
+  // customerEmail:string,
+  driverEmail:string
 }) => {
   try {
-    console.log("sending delivery data:", data);
+    
+    console.log("customer:", data.customer);
+    // console.log("customerEmail:", data.customerEmail);
+    console.log("pickup:", data.pickup);
+    console.log("dropoff:", data.dropoff);
+    console.log("===========praise the Lord(every thing is working)=============");
 
     const response = await fetch(`${BASE_URL}/deliveries`, {
       method: "POST",
@@ -76,6 +85,17 @@ export const createDelivery = async (data: {
       console.error("aPI error response:", responseData);
       throw new Error(responseData.message || "failed to create delivery");
     }
+
+    // Now check email status
+    if (!responseData.emailSent) {
+      Alert.alert(
+        "Delivery Created",
+        `Delivery created but email failed: ${responseData.emailError}`
+      );
+    } else {
+      Alert.alert("Delivery Created", "Email sent successfully!");
+    }
+
     return responseData;
   } catch (err) {
     console.error("createDelivery failed:", err);
