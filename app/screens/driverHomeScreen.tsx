@@ -1,5 +1,6 @@
 import  React, {useEffect, useState} from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet} from "react-native";
+import { Button } from "react-native-paper";
 import MapSection from "../components/mapSection";
 import BottomPanel from "../components/BottomPanel";
 import { Delivery, updateDeliveryStatus, DeliveryStatus } from "../services/deliveryService";
@@ -7,8 +8,8 @@ import { useLiveLocation } from "../hooks/useLiveLocation";
 import { io, Socket } from "socket.io-client";
 import * as Location from "expo-location"
 
-
 export default function DriverHomeScreen(){
+
 
 const SERVER_URL = "https://curb-side-backend.onrender.com";
 
@@ -62,49 +63,14 @@ const [delivery, setDelivery] = useState<any | null>(null);
 
 
 
-
-    // deal with background tracking even when the app is minimized
-
-    // const startBackgroundTracking = async () => {
-    // await Location.startLocationUpdatesAsync("background-location-task", {
-    //     accuracy: Location.Accuracy.High,
-    //     timeInterval: 5000,
-    //     distanceInterval: 10,
-    //     showsBackgroundLocationIndicator: true,
-    //     foregroundService: {
-    //     notificationTitle: "Driver Tracking",
-    //     notificationBody: "Your location is being tracked",
-    //     },
-    // });
-    // };
-
-    // function to deal with stop backgound tracking
-
-    // const stopBackgroundTracking = async () => {
-    // await Location.stopLocationUpdatesAsync("background-location-task");
-    // };
-
-    // // useEffect to deal with making sure that some driver is online then track unless that stop tracking 
-
-    // useEffect(()=>{
-    //     if(isOnline){
-    //         startBackgroundTracking();
-    //     }else{
-    //         stopBackgroundTracking();
-    //     }
-    // },[isOnline]);
-
-
-    // deal with updating status of delivery
-
   const handleUpdateStatus = async (status: DeliveryStatus) => {
         try {
-        const updatedDelivery = await updateDeliveryStatus( "6995a1441287438bcc1b8641", status);
-        console.log("Server Responded with: ", updatedDelivery );
-        setDelivery(updatedDelivery); // trust serveer response
-        } catch (error) {
-        console.log("Status update failed:", error);
-    }
+            const updatedDelivery = await updateDeliveryStatus( "6995a1441287438bcc1b8641", status);
+            console.log("Server Responded with: ", updatedDelivery );
+            setDelivery(updatedDelivery); // trust serveer response
+            } catch (error) {
+            console.log("Status update failed:", error);
+      }
     };
 
     

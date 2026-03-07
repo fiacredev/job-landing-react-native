@@ -102,3 +102,34 @@ export const createDelivery = async (data: {
     throw err;
   }
 };
+
+// fetch all deliveries for a specific customer
+export const getCustomerDeliveries = async (customerId: string) => {
+  try {
+    const res = await fetch(`${BASE_URL}/deliveries/${customerId}`);
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "failed to fetch deliveries");
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("getCustomerDeliveries failed:", err);
+    throw err;
+  }
+};
+
+export const getNearbyDeliveries = async (lat: number, lng: number) => {
+  const res = await fetch(
+    `${BASE_URL}/deliveries/nearby?lat=${lat}&lng=${lng}`
+  );
+
+  if (!res.ok) {
+    throw new Error(`Error fetching nearby deliveries: ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data;
+};

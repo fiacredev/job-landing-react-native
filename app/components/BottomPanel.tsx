@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Button, Card, Text, Portal, Dialog } from "react-native-paper"
 import { Delivery, DeliveryStatus } from "../services/deliveryService";
+import { useRouter } from "expo-router";
 
     interface BottomPanelProps {
       isOnline: boolean;
@@ -20,6 +21,7 @@ import { Delivery, DeliveryStatus } from "../services/deliveryService";
 
     const toggleOnline = () => setIsOnline(!isOnline);
     const handleGoOnline = () => setIsOnline(true);
+    const router = useRouter();
 
     const renderWorkflowButton = () => {
         
@@ -70,11 +72,11 @@ import { Delivery, DeliveryStatus } from "../services/deliveryService";
                 <Button
                     mode={isOnline ? "contained" : "outlined"}
                     onPress={toggleOnline}
-                    style={styles.onlineButton}
+                     style={[styles.onlineButton, { width: "50%", alignSelf: "center" }]}
                 >
                     {isOnline ? "Go Offline" : "Go Online"}
                 </Button>
-                <View style={styles.workflow}>{renderWorkflowButton()}</View>
+                <Button mode="contained" style={[styles.nearbyButton, { width: "70%", alignSelf: "center" }]} onPress={() => router.push("/screens/AvailableDeliveries")} >Available NearBy Deliveries</Button>
             </View>
 
 
@@ -145,4 +147,9 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontSize: 16,
     },
+    nearbyButton: {
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    backgroundColor: "#ccc9c9",
+},
 })

@@ -8,10 +8,13 @@ import { getNearbyDrivers, createDelivery } from "../../services/deliveryService
 import { Alert } from "react-native";
 import { calculateETA } from "@/app/utils/calculateETA";
 import { Portal, Dialog, Text } from "react-native-paper";
+import { useRouter } from "expo-router";
 
 export default function CustomerHomeScreen() {
     
   const mapRef = useRef<MapView | null>(null);
+
+  const router = useRouter();
 
   const userIdForTesting = "6995a1441287438bcc1b863b";
   // const customerEmailForTesting = "checkmepocket@gmail.com"
@@ -67,7 +70,8 @@ const [dialogVisible, setDialogVisible] = useState(false);
   }
 
   return (
-    <View style={styles.container}>
+    <>
+        <View style={styles.container}>
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -99,13 +103,13 @@ const [dialogVisible, setDialogVisible] = useState(false);
 
             return (
               <Marker
-                key={driver._id}
-                coordinate={{
-                  latitude,
-                  longitude,
-                }}
-                title={driver.name}
-                pinColor="blue"
+              key={driver._id}
+              coordinate={{
+                latitude,
+                longitude,
+              }}
+              title={driver.name}
+              pinColor="blue"
               />
             );
           })}
@@ -126,6 +130,14 @@ const [dialogVisible, setDialogVisible] = useState(false);
 
           
       </MapView>
+           
+              <Dialog.Content>
+                  <View style={styles.dialog}>
+                  <Button mode="contained" onPress={() => router.push("/components/customer/OrderHistoryScreen")} style={styles.dialogButton}>History</Button>
+                  </View>
+              </Dialog.Content>
+
+      
 
           {pickup && drop && !delivery && (
           <>
@@ -189,6 +201,7 @@ const [dialogVisible, setDialogVisible] = useState(false);
               </Dialog>
             </Portal>
     </View>
+    </>
   );
 }
 
@@ -199,7 +212,8 @@ const styles = StyleSheet.create({
   },
 
   map: {
-    ...StyleSheet.absoluteFillObject,
+    // ...StyleSheet.absoluteFillObject,
+    flex: 1,
   },
 
   bottomPanel: {
@@ -262,4 +276,11 @@ dialogButton: {
     borderRadius: 10,
     paddingHorizontal: 10,
 },
+ buttonHistoryContainer: {
+    width:"25%",
+    padding: 10,
+    backgroundColor: "#684de0",
+    color:"#fff",
+    justifyContent: "center",
+  },
 });
