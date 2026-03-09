@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
+import { ScrollView } from "react-native";
 import { DriverContext } from "../components/DriverContext";
 import { useNavigation } from '@react-navigation/native';
 import {View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
@@ -6,6 +7,7 @@ import { IconButton } from "react-native-paper";
 import * as Location from "expo-location";
 
 import { getNearbyDeliveries, updateDeliveryStatus, DeliveryStatus } from "../services/deliveryService";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AvailableDeliveriesScreen() {
 
@@ -33,28 +35,68 @@ const { socket } = useContext(DriverContext);
   }, []);
 
   const fetchNearbyDeliveries = async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
 
-      if (status !== "granted") {
-        console.log("Permission denied");
-        return;
-      }
+  try {
+    setLoading(true);
 
-      const location = await Location.getCurrentPositionAsync({});
+    const { status } = await Location.requestForegroundPermissionsAsync();
 
-      const lat = location.coords.latitude;
-      const lng = location.coords.longitude;
+    if (status !== "granted") {
+      console.log("Permission denied");
+      return;
+    }
 
-      const data = await getNearbyDeliveries(lat, lng);
+    const location = await Location.getCurrentPositionAsync({});
 
-      setDeliveries(data);
+             const lat = location.coords.latitude;
+          const lng = location.coords.longitude;
+
+        const data = await getNearbyDeliveries(lat, lng);
+
+          // convert coordinates → readable addresses
+
+          const deliveriesWithAddresses = await Promise.all(
+            data.map(async (delivery: any) => {
+              const pickupGeo = await Location.reverseGeocodeAsync({
+                latitude: delivery.pickup?.lat,
+                longitude: delivery.pickup?.lng,
+              });
+
+              const dropoffGeo = await Location.reverseGeocodeAsync({
+                latitude: delivery.dropoff?.lat,
+                longitude: delivery.dropoff?.lng,
+              });
+
+              const pickupAddress =
+                pickupGeo.length > 0
+                  ? `${pickupGeo[0].name || ""} ${pickupGeo[0].street || ""}, ${
+                      pickupGeo[0].city || ""
+                    }`
+                  : "Unknown location";
+
+              const dropoffAddress =
+                dropoffGeo.length > 0
+                  ? `${dropoffGeo[0].name || ""} ${dropoffGeo[0].street || ""}, ${
+                      dropoffGeo[0].city || ""
+                    }`
+                  : "Unknown location";
+
+              return {
+                ...delivery,
+                pickupAddress,
+                dropoffAddress,
+              };
+            })
+          );
+
+          setDeliveries(deliveriesWithAddresses);
+
     } catch (err) {
       console.log("failed to fetch deliveries", err);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleUpdateStatus = async (
     deliveryId: string,
@@ -73,6 +115,7 @@ const { socket } = useContext(DriverContext);
 
   const renderDelivery = ({ item }: any) => {
     return (
+      <SafeAreaView style={{ flex:1 }}>
       <View style={styles.card}>
         <View style={styles.header}>
           <Text style={styles.deliveryId}>Delivery #{item._id.slice(-5)}</Text>
@@ -83,12 +126,12 @@ const { socket } = useContext(DriverContext);
 
         <View style={styles.addressContainer}>
           <Text style={styles.label}>Pickup</Text>
-          <Text style={styles.address}>{item.pickup?.lat}, {item.pickup?.lng}</Text>
+          <Text style={styles.address}>{item.pickupAddress}</Text>
         </View>
 
         <View style={styles.addressContainer}>
           <Text style={styles.label}>Dropoff</Text>
-          <Text style={styles.address}>{item.dropoff?.lat}, {item.dropoff?.lng}</Text>
+          <Text style={styles.address}>{item.dropoffAddress}</Text>
         </View>
 
         <View style={styles.actions}>
@@ -114,6 +157,7 @@ const { socket } = useContext(DriverContext);
           </TouchableOpacity>
         </View>
       </View>
+      </SafeAreaView>
     );
   };
 
@@ -127,31 +171,33 @@ const { socket } = useContext(DriverContext);
   }
 
   return (
-    <View style={styles.container}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <IconButton
-              icon="arrow-left"
-              size={24}
-              onPress={() => navigation.goBack()}
-            />
+    <SafeAreaView style={{ flex:1 }} >
+      <View style={styles.container}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <IconButton
+                icon="arrow-left"
+                size={24}
+                onPress={() => navigation.goBack()}
+              />
 
-            <Text style={styles.pageTitle}>
-              Available Nearby Deliveries...
-            </Text>
-        </View>
+              <Text style={styles.pageTitle}>
+                Nearby Deliveries...
+              </Text>
+          </View>
 
-      <FlatList
-        data={deliveries}
-        keyExtractor={(item) => item._id}
-        renderItem={renderDelivery}
-        contentContainerStyle={{ paddingBottom: 30 }}
-        ListEmptyComponent={
-        <View style={styles.center}>
-        <Text>No nearby deliveries found</Text>
-        </View>
-        }
-      />
-    </View>
+        <FlatList
+          data={deliveries}
+          keyExtractor={(item) => item._id}
+          renderItem={renderDelivery}
+          contentContainerStyle={{ paddingBottom: 30, paddingTop: 16 }}
+          ListEmptyComponent={
+          <View style={styles.center}>
+          <Text>No nearby deliveries found</Text>
+          </View>
+          }
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -166,7 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 14,
     padding: 16,
-    marginBottom: 14,
+    // marginBottom: 5,
     elevation: 3,
   },
 
@@ -246,12 +292,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   pageTitle:{
-  fontSize:20,
+  fontSize:17,
   textAlign:"center",
   fontWeight:"700",
   color:"#333",
   backgroundColor:"#f5f5f5",
-  padding:10,
-  borderRadius:8
 }
 });
