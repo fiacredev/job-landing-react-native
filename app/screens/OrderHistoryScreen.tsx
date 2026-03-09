@@ -1,14 +1,18 @@
-// src/screens/OrderHistoryScreen.tsx
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Card, Text, IconButton } from "react-native-paper";
-import { getCustomerDeliveries } from "../../services/deliveryService";
+import { getCustomerDeliveries } from '../services/deliveryService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Location from "expo-location";
 
 interface Delivery {
   _id: string;
   pickup: { lat: number; lng: number };
   dropoff: { lat: number; lng: number };
+  pickupAddress?: string;
+  dropoffAddress?: string;
   status: string;
   createdAt: string;
 }
@@ -18,24 +22,68 @@ export default function OrderHistoryScreen() {
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const userIdForTesting = "6995a1441287438bcc1b863b"; // temporary test id
-
   const navigation = useNavigation();
 
-  useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const deliveries = await getCustomerDeliveries(userIdForTesting);
-      setDeliveries(deliveries);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  fetchData();
-}, []);
+
+    useEffect(() => {
+      const fetchData = async () => {
+
+      try {
+
+        const userId = await AsyncStorage.getItem("userId");
+
+      if (!userId) {
+        console.error("User not logged in");
+        return;
+      }
+
+      const deliveries = await getCustomerDeliveries(userId);
+
+          const deliveriesWithAddresses = await Promise.all(
+            deliveries.map(async (delivery: any) => {
+              const pickupGeo = await Location.reverseGeocodeAsync({
+                latitude: delivery.pickup.lat,
+                longitude: delivery.pickup.lng,
+              });
+
+              const dropoffGeo = await Location.reverseGeocodeAsync({
+                latitude: delivery.dropoff.lat,
+                longitude: delivery.dropoff.lng,
+              });
+
+              const pickupAddress =
+                pickupGeo.length > 0
+                  ? `${pickupGeo[0].name || ""} ${pickupGeo[0].street || ""}, ${
+                      pickupGeo[0].city || ""
+                    }`
+                  : "Unknown location";
+
+              const dropoffAddress =
+                dropoffGeo.length > 0
+                  ? `${dropoffGeo[0].name || ""} ${dropoffGeo[0].street || ""}, ${
+                      dropoffGeo[0].city || ""
+                    }`
+                  : "Unknown location";
+
+              return {
+                ...delivery,
+                pickupAddress,
+                dropoffAddress,
+              };
+            })
+          );
+
+          setDeliveries(deliveriesWithAddresses);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchData();
+    }, []);
 
   const renderDelivery = ({ item }: { item: Delivery }) => (
     <Card style={styles.card} elevation={2}>
@@ -44,10 +92,11 @@ export default function OrderHistoryScreen() {
           Delivery #{item._id.slice(-6)}
         </Text>
         <Text variant="bodyMedium">
-          Pickup: {item.pickup.lat.toFixed(4)}, {item.pickup.lng.toFixed(4)}
+          Pickup: {item.pickupAddress}
         </Text>
+
         <Text variant="bodyMedium">
-          Dropoff: {item.dropoff.lat.toFixed(4)}, {item.dropoff.lng.toFixed(4)}
+          Dropoff: {item.dropoffAddress}
         </Text>
         <Text variant="bodyMedium">Status: {item.status}</Text>
         <Text variant="bodyMedium">
@@ -74,6 +123,7 @@ export default function OrderHistoryScreen() {
 }
 
   return (
+    <SafeAreaView style={{ flex:1 }}>
     <View style={styles.container}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
             <IconButton
@@ -94,6 +144,7 @@ export default function OrderHistoryScreen() {
         contentContainerStyle={{ padding: 10 }}
       />
     </View>
+    </SafeAreaView>
   );
 }
 

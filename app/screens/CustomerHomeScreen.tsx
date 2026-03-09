@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
+import { ScrollView } from "react-native";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import * as Updates from "expo-updates";
 import { Button } from "react-native-paper";
-import { getNearbyDrivers, createDelivery } from "../../services/deliveryService";
+import { getNearbyDrivers, createDelivery } from "../services/deliveryService";
 import { Alert } from "react-native";
 import { calculateETA } from "@/app/utils/calculateETA";
 import { Portal, Dialog, Text } from "react-native-paper";
@@ -16,14 +18,11 @@ export default function CustomerHomeScreen() {
 
   const router = useRouter();
 
-  const userIdForTesting = "6995a1441287438bcc1b863b";
-  // const customerEmailForTesting = "checkmepocket@gmail.com"
-  const driverEmailForTest = "nothing@gmail.com"
-
   const [userLocation, setUserLocation] = useState<any>(null);
   const [drivers, setDrivers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [buttonDeliveryLoading, setButtonDeliveryLoading] = useState(false);
+  const [customerId, setCustomerId] = useState<string | null>(null);
 
 // states to help our users deal with creating deliveries 
 
@@ -35,6 +34,24 @@ const [delivery, setDelivery] = useState<any>(null);
 
 const [eta, setEta] = useState<number | null>(null);
 const [dialogVisible, setDialogVisible] = useState(false);
+
+  useEffect(() => {
+    const loadCustomer = async () => {
+      try {
+        const storedCustomerId = await AsyncStorage.getItem("userId");
+
+        if (storedCustomerId) {
+          console.log("Logged customer:", storedCustomerId);
+          setCustomerId(storedCustomerId);
+        }
+      } catch (err) {
+        console.error("Failed to load customer:", err);
+      }
+    };
+
+    loadCustomer();
+  }, []);
+  
 
   useEffect(() => {
     init();
@@ -71,6 +88,7 @@ const [dialogVisible, setDialogVisible] = useState(false);
 
   return (
     <>
+     <ScrollView contentContainerStyle={{ flexGrow: 1 }} >
         <View style={styles.container}>
       <MapView
         ref={mapRef}
@@ -133,7 +151,7 @@ const [dialogVisible, setDialogVisible] = useState(false);
            
               <Dialog.Content>
                   <View style={styles.dialog}>
-                  <Button mode="contained" onPress={() => router.push("/components/customer/OrderHistoryScreen")} style={styles.dialogButton}>History</Button>
+                  <Button mode="contained" onPress={() => router.push("/screens/OrderHistoryScreen")} style={styles.dialogButton}>History</Button>
                   </View>
               </Dialog.Content>
 
@@ -153,12 +171,15 @@ const [dialogVisible, setDialogVisible] = useState(false);
               onPress={async () => {
                   try {
 
+                    if (!customerId) {
+                      Alert.alert("Error", "User not authenticated");
+                      return;
+                    }
+
                     const payload = {
-                      customer:userIdForTesting,
+                      customer: customerId,
                       pickup: { lat: pickup.latitude, lng: pickup.longitude },
                       dropoff: { lat: drop.latitude, lng: drop.longitude },
-                      // customerEmail: customerEmailForTesting,
-                      driverEmail:driverEmailForTest
                     };
 
                     const newDelivery = await createDelivery(payload);
@@ -178,7 +199,6 @@ const [dialogVisible, setDialogVisible] = useState(false);
               Request Delivery
             </Button>       
             </View>
-
           </>
         )}
 
@@ -201,6 +221,7 @@ const [dialogVisible, setDialogVisible] = useState(false);
               </Dialog>
             </Portal>
     </View>
+    </ScrollView>
     </>
   );
 }
