@@ -7,17 +7,16 @@ import { PaperProvider } from "react-native-paper";
 
 import DriverHomeScreen from "./screens/driverHomeScreen";
 import AvailableDeliveries from "./screens/AvailableDeliveries";
-import CustomerHomeScreen from "./components/customer/CustomerHomeScreen";
+import CustomerHomeScreen from "./screens/CustomerHomeScreen";
+import DriverLoginScreen from "./screens/DriverLoginScreen";
+import DriverSignupScreen from "./screens/DriverSignupScreen";
+import RoleSelectionScreen from "./screens/RoleSelectionScreen";
 
 export default function App({ children }: { children: ReactNode }) {
   return (
-    <PaperProvider>
-    <DriverProvider>
       <SafeAreaView style={styles.container}>
-        <DriverHomeScreen />
+        <RoleSelectionScreen />
       </SafeAreaView>
-    </DriverProvider>
-    </PaperProvider>
   );
 }
 
