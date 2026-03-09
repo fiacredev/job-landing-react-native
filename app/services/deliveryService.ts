@@ -1,4 +1,6 @@
 const BASE_URL = "https://curb-side-backend.onrender.com";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { Alert } from "react-native";
 
 export interface Delivery {
@@ -22,6 +24,13 @@ export const updateDeliveryStatus = async (
   deliveryId: string,
   status: DeliveryStatus
 ) => {
+
+  const driverId = await AsyncStorage.getItem("userId");
+
+   if (!driverId) {
+    throw new Error("Driver not logged in");
+  }
+
   const response = await fetch(
     `${BASE_URL}/deliveries/${deliveryId}/status`,
     {
@@ -29,7 +38,7 @@ export const updateDeliveryStatus = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status, driverId }),
     }
   );
 
@@ -61,8 +70,6 @@ export const createDelivery = async (data: {
   customer:string;
   pickup: { lat: number; lng: number };
   dropoff: { lat: number; lng: number };
-  // customerEmail:string,
-  driverEmail:string
 }) => {
   try {
     
