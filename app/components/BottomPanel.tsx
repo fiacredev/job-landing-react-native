@@ -93,7 +93,7 @@ import { useRouter } from "expo-router";
             <Dialog.Title>You are offline</Dialog.Title>
             <Dialog.Content>
                 <Text>
-                    Please, you can't do anything regardless going online. APP BLOCKED 🧲⁉
+                    Would you mind connecting to the internet?
                 </Text>
             </Dialog.Content>
             <Dialog.Actions>
